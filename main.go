@@ -63,6 +63,7 @@ type Config struct {
 var config Config
 var fromLan string
 var toLan string
+var m = make(map[string]string)
 
 func main() {
 
@@ -76,6 +77,7 @@ func main() {
 	http.HandleFunc("/whois", whoisHandler)
 	http.HandleFunc("/sntransfer", sntransferHandler)
 	http.HandleFunc("/upload", upload)
+	http.HandleFunc("/check", checkHandler)
 
 	log.Fatal(http.ListenAndServe("localhost:8080", nil))
 }
@@ -116,11 +118,10 @@ func sntransferHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, Response{Result: result})
 }
 func sntransfer(data string) (string, error) {
+	var tempString string
 	//fmt.Println(data)
 	//把文本中的\t \n \v \f \r 都分割成slice
 	temp := strings.Fields(data)
-
-	m := make(map[string]string)
 
 	fmt.Println(temp)
 	//s := make([]string, len(temp))
@@ -130,30 +131,30 @@ func sntransfer(data string) (string, error) {
 			continue
 		} else {
 			m[temp[i]] = temp[i+1]
-
 		}
 
 		//s[i] = fmt.Sprintf("%s"+temp[i]+"%s", "'", "',")
 		//m["english"+string(i)] = temp[i]
 		//fmt.Println(s[i])
-		fmt.Printf("map key is: %v ;value is:%v \n", m, m[temp[i]])
-
+		//fmt.Printf("map key is: %v ;value is:%v \n", m, m[temp[i]])
 	}
 	for k := range m {
-		chinese := ""
-		fmt.Println(k)
-		fmt.Scanln(&chinese)
+		//chinese := ""
+		//fmt.Println(k)
+		//fmt.Scanln(&chinese)
+
 		// Call the value by the key.
 
-		for !(m[k] == chinese) {
+		/* for !(m[k] == chinese) {
 			log.Print("Wrong value")
 			fmt.Scanln(&chinese)
-		}
-		//fmt.Println(m)
-	}
-	//s[len(temp)-1] = fmt.Sprintf("%s"+temp[len(temp)-1]+"%s", "'", "'")
+		} */
 
-	tempString := "true"
+		//回傳每個單字的題目和輸入框給前端
+		tempString = tempString + `<form id="answerForm">`
+		tempString = tempString + fmt.Sprintf(k+"%s", `&emsp;<input type="text" id="input`+k+`" placeholder="english" />&emsp;<button type="submit">Check</button><br>`)
+		tempString = tempString + `</form>`
+	}
 	//fmt.Println(tempString)
 	return tempString, nil
 }
@@ -398,4 +399,28 @@ func HexBuffToString(buff []byte) string {
 		}
 	}
 	return ret
+}
+func checkHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	data := r.PostFormValue("data")
+
+	result, err := check(data)
+
+	if err != nil {
+		jsonResponse(w, Response{Error: err.Error()})
+		return
+	}
+	jsonResponse(w, Response{Result: result})
+}
+func check(data string) (string, error) {
+
+	if m["seal"] == data {
+		return "答對", nil
+	}
+
+	return "錯誤", nil
 }

@@ -13,6 +13,7 @@
     </form>
     <div id="resultDiv"></div>
     <div id="snresultDiv"></div>
+    <div id="answerResultDiv"></div>
     <form id="uploadForm" enctype="multipart/form-data" action="/upload" method="post">
     <input type="file" name="uploadfile" />
     <input type="hidden" name="token" value="{{.}}"/>
@@ -20,5 +21,6 @@
     </form>
     <script src="index.js"></script>
     <script src="sn.js"></script>
+    <script src="check.js"></script>
   </body>
 </html>
